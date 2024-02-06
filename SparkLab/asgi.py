@@ -16,4 +16,4 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SparkLab.settings")
 application = get_asgi_application()
 
 #This change by Kenessary
-
+#second change
