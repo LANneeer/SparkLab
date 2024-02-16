@@ -1,3 +1,6 @@
 from bot.infrastructure.handlers.main import dp
+from bot.infrastructure.handlers.menu import router as menu_router
+from bot.infrastructure.handlers.help import router as help_router
 
-__all__ = [dp]
+
+routers = [menu_router, help_router]
