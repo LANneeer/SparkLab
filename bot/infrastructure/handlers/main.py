@@ -14,10 +14,14 @@ dp = BotConfig.dp
 async def hello(message: types.Message, state: FSMContext):
     if not User.objects.filter(telegram_id=message.from_user.id).exists():
         User.objects.create_user(username=message.from_user.username, telegram_id=message.from_user.id)
-    await message.answer(text=f'Привет, {message.from_user.username}! Я бот, который поможет тебе забронировать место '
-                              f'в общественном транспорте. Для начала работы введи своё имя.'
-                         )
-    await state.set_state(Registration.first_name)
+        await message.answer(text=f'Привет, {message.from_user.username}! Я бот, который поможет тебе забронировать место '
+                                  f'в транспорте. Для начала работы введи своё имя.'
+                             )
+        await state.set_state(Registration.first_name)
+    else:
+        await message.answer(text=f'Привет, {message.from_user.username}! Я рад видеть тебя снова. '
+                                  f'Ты можешь воспользоваться меню команд /menu'
+                             )
 
 
 @dp.message(state=Registration.first_name)
@@ -35,7 +39,7 @@ async def get_last_name(message: types.Message, state: FSMContext):
     user.last_name = message.text
     user.save()
     await message.answer(text='Теперь ты можешь воспользоваться меню команд /menu')
-    await state.set_state(Main.menu)
+    await state.clear()
 
 
 @dp.message(Command("menu"))
