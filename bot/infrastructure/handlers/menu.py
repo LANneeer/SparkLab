@@ -1,4 +1,4 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 
@@ -7,31 +7,7 @@ from bot.infrastructure.states.main import Main
 router = Router()
 
 
-@router.message(Command("menu"))
-async def menu(message: types.Message):
-    await message.answer(
-        text='<b>Меню</b>',
-        reply_markup=types.ReplyKeyboardMarkup(
-            keyboard=[
-                [
-                    types.KeyboardButton(text='Получить помощь')
-                ],
-                [
-                    types.KeyboardButton(text='Узнать о загруженности общественного транспорта')
-                ],
-                [
-                    types.KeyboardButton(text='Сообщить о загруженности общественного транспорта')
-                ],
-                [
-                    types.KeyboardButton(text='Оставить отзыв/предложения')
-                ]
-            ],
-            resize_keyboard=True
-        )
-    )
-
-
-@router.message("Получить помощь")
+@router.message(F.text == "Получить помощь")
 async def get_help(message: types.Message):
     await message.answer(
         text='<b>Степени загруженности:</b>\n'
@@ -48,7 +24,6 @@ async def get_crowd(message: types.Message):
     )
 
 
-@router.message("Сообщить о загруженности общественного транспорта")
 @router.message(Command("report"))
 async def report(message: types.Message, state: FSMContext):
     await state.set_state(Main.report)

@@ -8,5 +8,5 @@ class Main(StatesGroup):
 
 
 class Registration(StatesGroup):
-    report = State()
-    confirm = State()
+    first_name = State()
+    last_name = State()
