@@ -4,14 +4,12 @@ import django
 from bot.infrastructure.handlers import dp
 from bot.apps import BotConfig
 from bot.management.commands._private import on_startup, on_shutdown
-from bot.infrastructure.handlers import routers
 import asyncio
 import os
 
 
 async def main() -> None:
     await on_startup(dp)
-    await dp.include_routers(routers)
     await dp.start_polling(BotConfig.bot)
     await on_shutdown(dp)
 

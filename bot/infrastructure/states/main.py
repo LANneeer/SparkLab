@@ -1,12 +1,25 @@
 from aiogram.fsm.state import State, StatesGroup
 
 
-class Main(StatesGroup):
+class MenuState(StatesGroup):
     menu = State()
+
+
+class ReportState(StatesGroup):
     report = State()
     confirm = State()
 
 
-class Registration(StatesGroup):
+class CommentState(StatesGroup):
+    comment = State()
+    confirm = State()
+
+
+class RideState(StatesGroup):
+    ride = State()
+    confirm = State()
+
+
+class RegistrationState(StatesGroup):
     first_name = State()
     last_name = State()
