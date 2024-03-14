@@ -1,0 +1,67 @@
+version: '3.9'
+
+
+volumes:
+  postgres-data: {}
+  media-data: {}
+  static-data: {}
+
+
+x-shared-environment: &shared-environment
+  DEBUG: "$DEBUG"
+  SECRET_KEY: "$SECRET_KEY"
+
+  BOT_TOKEN: "$BOT_TOKEN"
+  WEBHOOK_HOST: "$WEBHOOK_HOST"
+  WEBHOOK_PATH: "$WEBHOOK_PATH"
+
+  DATABASE_URL: "$DATABASE_URL"
+  POSTGRES_DB: "$POSTGRES_DB"
+  POSTGRES_USER: "$POSTGRES_USER"
+  POSTGRES_PASSWORD: "$POSTGRES_PASSWORD"
+  PGDATA: "$PGDATA"
+  HOST: "$HOST"
+  ALLOWED_HOSTS: "$ALLOWED_HOSTS"
+
+
+services:
+  postgres:
+    image: postgres:12
+    container_name: spark_db
+    environment: *shared-environment
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark_web
+    restart: always
+    command: sh -c "python manage.py runserver"
+    environment: *shared-environment
+    volumes:
+      - .:/app
+      - media-data:/usr/src/app/media
+      - static-data:/usr/src/app/static
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: spark_nginx
+    restart: on-failure
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - media-data:/media
+      - static-data:/static
+    depends_on:
+      - web
