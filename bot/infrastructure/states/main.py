@@ -17,7 +17,9 @@ class CommentState(StatesGroup):
 
 class RideState(StatesGroup):
     ride = State()
+    payment = State()
     confirm = State()
+
 
 
 class RegistrationState(StatesGroup):

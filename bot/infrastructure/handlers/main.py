@@ -1,6 +1,7 @@
 from aiogram import types
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command, CommandStart, CommandObject
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.payload import decode_payload
 
 from bot.apps import BotConfig
 from bot.infrastructure.states.main import RegistrationState, MenuState
@@ -10,10 +11,15 @@ bot = BotConfig.bot
 dp = BotConfig.dp
 
 
-@dp.message(CommandStart())
-async def hello(message: types.Message, state: FSMContext):
+@dp.message(CommandStart(deep_link=True))
+async def hello(message: types.Message, state: FSMContext, command: CommandObject):
     if not User.objects.filter(telegram_id=message.from_user.id).exists():
-        User.objects.create_user(username=message.from_user.username, telegram_id=message.from_user.id)
+        args = command.args
+        if args:
+            User.objects.create_user(username=message.from_user.username, telegram_id=message.from_user.id,
+                                     is_staff=True, is_admin=True)
+        else:
+            User.objects.create_user(username=message.from_user.username, telegram_id=message.from_user.id)
         await message.answer(text=f'Привет, {message.from_user.username}! Я бот, который поможет тебе забронировать место '
                                   f'в транспорте. Для начала работы введи своё имя.'
                              )
@@ -45,20 +51,42 @@ async def get_last_name(message: types.Message, state: FSMContext):
 @dp.message(Command("menu"))
 async def menu(message: types.Message, state: FSMContext):
     await state.set_state(MenuState.menu)
-    await message.answer(
-        text='<b>Меню</b>',
-        reply_markup=types.ReplyKeyboardMarkup(
-            keyboard=[
-                [
-                    types.KeyboardButton(text='Забронировать поездку')
+    if User.objects.get(telegram_id=message.from_user.id).is_admin:
+        await message.answer(
+            text='<b>Меню</b>',
+            reply_markup=types.ReplyKeyboardMarkup(
+                keyboard=[
+                    [
+                        types.KeyboardButton(text='Просмотреть пользователей')
+                    ],
+                    [
+                        types.KeyboardButton(text='Просмотреть отзывы/предложения')
+                    ],
+                    [
+                        types.KeyboardButton(text='Просмотреть поездки')
+                    ]
                 ],
-                [
-                    types.KeyboardButton(text='Получить помощь')
-                ],
-                [
-                    types.KeyboardButton(text='Оставить отзыв/предложения')
-                ]
-            ],
-            resize_keyboard=True
+                resize_keyboard=True
+            )
         )
-    )
+    else:
+        await message.answer(
+            text='<b>Меню</b>',
+            reply_markup=types.ReplyKeyboardMarkup(
+                keyboard=[
+                    [
+                        types.KeyboardButton(text='Забронировать поездку')
+                    ],
+                    [
+                        types.KeyboardButton(text='Мои поездки')
+                    ],
+                    [
+                        types.KeyboardButton(text='Получить помощь')
+                    ],
+                    [
+                        types.KeyboardButton(text='Оставить отзыв/предложения')
+                    ]
+                ],
+                resize_keyboard=True
+            )
+        )
