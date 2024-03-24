@@ -6,12 +6,14 @@ from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username, telegram_id=None, password=None):
+    def create_user(self, username, telegram_id=None, password=None, is_staff=False, is_admin=False):
         if not username:
             raise ValueError(_('The Username must be set'))
         user = self.model(
             username=username,
-            telegram_id=telegram_id
+            telegram_id=telegram_id,
+            is_staff=is_staff,
+            is_admin=is_admin
         )
         user.set_password(password)
         user.save(using=self._db)

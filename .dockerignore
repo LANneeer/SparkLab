@@ -1,0 +1,31 @@
+# Ignore git files
+.git
+.gitignore
+
+# Ignore all markdown files (README etc.)
+*.md
+
+# Ignore all log files
+*.log
+
+# Ignore Python compiled files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore temporary files
+*.tmp
+
+# Ignore .env files
+*.env
+
+# Ignore IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+
+# Ignore Python virtual environment
+venv/
