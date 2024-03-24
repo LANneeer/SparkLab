@@ -32,7 +32,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data/
     ports:
-      - "5432:5432"
+      - "5434:5432"
 
   web:
     build:
@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile
     container_name: spark_web
     restart: always
-    command: sh -c "python manage.py runserver"
+    command: sh -c "bash entrypoint.sh"
     environment: *shared-environment
     volumes:
       - .:/app
@@ -57,7 +57,7 @@ services:
       dockerfile: Dockerfile
     container_name: spark_bot
     restart: always
-    command: sh -c "python manage.py run_bot"
+    command: sh -c "python manage.py runbot"
     environment: *shared-environment
     volumes:
       - .:/app
