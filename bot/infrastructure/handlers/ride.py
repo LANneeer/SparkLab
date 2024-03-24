@@ -65,10 +65,11 @@ async def confirm_ride(message: types.Message, state: FSMContext):
     user = User.objects.get(telegram_id=message.from_user.id)
     ride = Ride.objects.get(ride_title=message.text.split(' - ')[0])
     ride.user.add(user)
+    manager = User.objects.filter(is_admin=True).first()
     await state.set_state(RideState.confirm)
     await message.answer(
         text=f'Оплатите 450тг на этот номер через каспи: '
-             f'87474104254 Сымбат.О',
+             f'{manager.payment_phone} - {manager.first_name} {manager.last_name[:1]}.\n',
         reply_markup=types.ReplyKeyboardMarkup(
             keyboard=[
                 [
@@ -115,28 +116,6 @@ async def my_rides(message: types.Message):
         text=text,
         reply_markup=user_menu
     )
-
-
-@router.callback_query(F.data.startswith('confirm'))
-async def confirm_ride(call: types.CallbackQuery):
-    user = User.objects.get(id=int(call.data.split('_')[1]))
-    ride = user.rides.first()
-    await call.bot.send_message(
-        chat_id=user.telegram_id,
-        text=f'Ваша поездка {ride.ride_title} на {ride.departure.strftime("%d.%m.%Y %H:%M")} подтверждена.'
-    )
-    await call.answer('Поездка подтверждена')
-
-
-@router.callback_query(F.data.startswith('decline'))
-async def decline_ride(call: types.CallbackQuery):
-    user = User.objects.get(id=int(call.data.split('_')[1]))
-    ride = user.rides.first()
-    await call.bot.send_message(
-        chat_id=user.telegram_id,
-        text=f'Ваша поездка {ride.ride_title} на {ride.departure.strftime("%d.%m.%Y %H:%M")} отклонена.'
-    )
-    await call.answer('Поездка отклонена')
 
 
 @router.message(F.text == "Получить помощь")
