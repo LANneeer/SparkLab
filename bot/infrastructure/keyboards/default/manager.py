@@ -3,19 +3,14 @@ from aiogram import types
 manager_menu = types.ReplyKeyboardMarkup(
     keyboard=[
         [
-            types.KeyboardButton(text='Забронировать поездку')
+            types.KeyboardButton(text='Просмотреть пользователей')
         ],
         [
-            types.KeyboardButton(text='Мои поездки')
+            types.KeyboardButton(text='Просмотреть отзывы/предложения')
         ],
         [
-            types.KeyboardButton(text='Получить помощь')
-        ],
-        [
-            types.KeyboardButton(text='Оставить отзыв/предложения')
+            types.KeyboardButton(text='Просмотреть поездки')
         ]
     ],
     resize_keyboard=True
 )
-
-

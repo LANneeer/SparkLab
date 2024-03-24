@@ -2,12 +2,12 @@ from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 from django.utils import timezone
 
-from bot.infrastructure.states.main import ReportState, CommentState, RideState
 from bot.infrastructure.keyboards.default.user import user_menu
+from bot.infrastructure.states.main import ReportState, CommentState, RideState
 from rides.models import Ride
 from users.models import Report, User, Comment
 
-router = Router(name='menu')
+router = Router(name='ride')
 
 
 @router.message(F.text == "Забронировать поездку")

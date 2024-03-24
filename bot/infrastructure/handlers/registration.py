@@ -2,15 +2,15 @@ from aiogram import types, Router
 from aiogram.filters import CommandStart, CommandObject
 from aiogram.fsm.context import FSMContext
 
-from bot.infrastructure.states.main import RegistrationState
-from bot.infrastructure.keyboards.default.user import user_menu
 from bot.infrastructure.keyboards.default.manager import manager_menu
+from bot.infrastructure.keyboards.default.user import user_menu
+from bot.infrastructure.states.main import RegistrationState
 from users.models import User
 
-router = Router(name='menu')
+router = Router(name='registration')
 
 
-@router.message(CommandStart(deep_link=True))
+@router.message(CommandStart())
 async def hello(message: types.Message, state: FSMContext, command: CommandObject):
     welcome_message = '<b>Привет! Добро пожаловать в бот проекта tezzhet.</b>\n' \
                       '<a href="https://t.me/almaty_transport_bot">tezzhet</a> - сервис бронирования удобных поездок для' \
@@ -68,7 +68,6 @@ async def get_last_name(message: types.Message, state: FSMContext):
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
         await message.answer(
             text='Теперь введи свой номер телефона.',
-            reply_markup=manager_menu
         )
         await state.set_state(RegistrationState.phone)
     else:
