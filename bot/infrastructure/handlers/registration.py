@@ -67,12 +67,25 @@ async def get_last_name(message: types.Message, state: FSMContext):
     user.save()
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
         await message.answer(
-            text='Теперь ты можешь воспользоваться меню команд /menu',
+            text='Теперь введи свой номер телефона.',
             reply_markup=manager_menu
         )
+        await state.set_state(RegistrationState.phone)
     else:
         await message.answer(
             text='Теперь ты можешь воспользоваться меню команд /menu',
             reply_markup=user_menu
         )
+        await state.clear()
+
+
+@router.message(RegistrationState.phone)
+async def get_phone(message: types.Message, state: FSMContext):
+    user = User.objects.get(telegram_id=message.from_user.id)
+    user.payment_phone = message.text
+    user.save()
+    await message.answer(
+        text='Теперь ты можешь воспользоваться меню команд /menu',
+        reply_markup=manager_menu
+    )
     await state.clear()

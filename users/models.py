@@ -33,6 +33,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=50, unique=True)
+    payment_phone = models.CharField(max_length=12, null=True, blank=True)
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     telegram_id = models.CharField(max_length=128, null=True, blank=True)

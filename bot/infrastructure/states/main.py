@@ -21,7 +21,7 @@ class RideState(StatesGroup):
     confirm = State()
 
 
-
 class RegistrationState(StatesGroup):
     first_name = State()
     last_name = State()
+    phone = State()

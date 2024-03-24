@@ -6,6 +6,7 @@ class Ride(models.Model):
     user = models.ManyToManyField(User, related_name='rides', blank=True)
     ride_title = models.CharField(max_length=255)
     ride_description = models.TextField()
+    max_passengers = models.PositiveIntegerField(default=4)
     departure = models.DateTimeField()
     arrival = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
