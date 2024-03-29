@@ -7,7 +7,7 @@ router = Router(name='payment')
 
 @router.callback_query(F.data.startswith('confirm'))
 async def confirm_ride(call: types.CallbackQuery):
-    user = User.objects.get(id=int(call.data.split('_')[1]))
+    user = User.objects.get(id=call.data.split('_')[1])
     ride = user.rides.first()
     await call.bot.send_message(
         chat_id=user.telegram_id,
@@ -18,7 +18,7 @@ async def confirm_ride(call: types.CallbackQuery):
 
 @router.callback_query(F.data.startswith('decline'))
 async def decline_ride(call: types.CallbackQuery):
-    user = User.objects.get(id=int(call.data.split('_')[1]))
+    user = User.objects.get(id=call.data.split('_')[1])
     ride = user.rides.first()
     await call.bot.send_message(
         chat_id=user.telegram_id,

@@ -22,7 +22,7 @@ async def send_ride(message: types.Message, state: FSMContext):
     if not rides:
         await message.answer(
             text='К сожалению, ближайших поездок нет.',
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=user_menu
         )
         await state.clear()
     else:
@@ -62,10 +62,9 @@ async def get_ride(message: types.Message, state: FSMContext):
 
 @router.message(RideState.payment)
 async def confirm_ride(message: types.Message, state: FSMContext):
-    user = User.objects.get(telegram_id=message.from_user.id)
     ride = Ride.objects.get(ride_title=message.text.split(' - ')[0])
-    ride.user.add(user)
     manager = User.objects.filter(is_admin=True).first()
+    await state.storage.set_data('ride', ride)
     await state.set_state(RideState.confirm)
     await message.answer(
         text=f'Оплатите 450тг на этот номер через каспи: '
@@ -75,6 +74,9 @@ async def confirm_ride(message: types.Message, state: FSMContext):
                 [
                     types.KeyboardButton(text='Подтвердить оплату')
                 ],
+                [
+                    types.KeyboardButton(text='Назад')
+                ],
             ],
             resize_keyboard=True
         )
@@ -83,29 +85,38 @@ async def confirm_ride(message: types.Message, state: FSMContext):
 
 @router.message(RideState.confirm)
 async def confirm_payment(message: types.Message, state: FSMContext):
-    user = User.objects.get(telegram_id=message.from_user.id)
-    manager = User.objects.filter(is_admin=True).first()
-    await message.bot.send_message(
-        chat_id=manager.telegram_id,
-        text=f'{user.username} оплатил поездку',
-        reply_markup=types.InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    types.InlineKeyboardButton(text='Подтвердить', callback_data=f'confirm_{user.id}')
-                ],
-                [
-                    types.InlineKeyboardButton(text='Отклонить', callback_data=f'decline_{user.id}')
+    if message.text == 'Подтвердить оплату':
+        user = User.objects.get(telegram_id=message.from_user.id)
+        manager = User.objects.filter(is_admin=True).first()
+        ride = await state.storage.get_data().get("ride")
+        await message.bot.send_message(
+            chat_id=manager.telegram_id,
+            text=f'{user.first_name} {user.last_name} оплатил поездку: \n'
+                 f'{ride.ride_title} - {ride.departure.strftime("%a %d - %H:%M")} '
+                 f'- {ride.arrival.strftime("%d.%m.%Y")}\n'
+                 f'Подтвердите или отклоните его заявку.',
+            reply_markup=types.InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        types.InlineKeyboardButton(text='Подтвердить', callback_data=f'confirm_{user.id}')
+                    ],
+                    [
+                        types.InlineKeyboardButton(text='Отклонить', callback_data=f'decline_{user.id}')
+                    ]
                 ]
-            ]
+            )
         )
-    )
-    await message.answer(
-        text=f'Вы успешно забронировали поездку {user.rides.first().ride_title} на '
-             f'{user.rides.first().departure.strftime("%d.%m.%Y %H:%M")}.'
-             f'Ожидайте подтверждения от менеджера.\n',
-        reply_markup=user_menu
-    )
-    await state.clear()
+        await message.answer(
+            text=f'Ожидайте подтверждения от менеджера.\n',
+            reply_markup=user_menu
+        )
+        await state.clear()
+    else:
+        await message.answer(
+            text='Поездка отменена.',
+            reply_markup=user_menu
+        )
+        await state.clear()
 
 
 @router.message(F.text == "Мои поездки")

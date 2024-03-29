@@ -62,4 +62,13 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user.username} - {self.comment[:50]}...'
+        return f'{self.user.first_name} - {self.comment[:50]}...'
+
+
+class ModerateSchedule(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField()
+
+    def __str__(self):
+        return f'{self.user.first_name} - {self.date}'
+
