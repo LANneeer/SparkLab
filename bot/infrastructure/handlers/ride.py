@@ -4,8 +4,8 @@ from django.utils import timezone
 
 from bot.infrastructure.keyboards.default.user import user_menu
 from bot.infrastructure.states.main import ReportState, CommentState, RideState
-from rides.models import Ride
-from users.models import Report, User, Comment
+from rides.models import Ride, RideRequest
+from users.models import Report, User, Comment, ModerateSchedule
 
 router = Router(name='ride')
 
@@ -63,8 +63,12 @@ async def get_ride(message: types.Message, state: FSMContext):
 @router.message(RideState.payment)
 async def confirm_ride(message: types.Message, state: FSMContext):
     ride = Ride.objects.get(ride_title=message.text.split(' - ')[0])
-    manager = User.objects.filter(is_admin=True).first()
-    await state.storage.set_data('ride', ride)
+    manager = ModerateSchedule.objects.filter(date__date=message.date).first().user
+    RideRequest.objects.create(
+        user=User.objects.get(telegram_id=message.from_user.id),
+        ride=ride,
+        status='pending',
+    )
     await state.set_state(RideState.confirm)
     await message.answer(
         text=f'Оплатите 450тг на этот номер через каспи: '
@@ -87,8 +91,8 @@ async def confirm_ride(message: types.Message, state: FSMContext):
 async def confirm_payment(message: types.Message, state: FSMContext):
     if message.text == 'Подтвердить оплату':
         user = User.objects.get(telegram_id=message.from_user.id)
-        manager = User.objects.filter(is_admin=True).first()
-        ride = await state.storage.get_data().get("ride")
+        manager = ModerateSchedule.objects.filter(date__date=message.date).first().user
+        ride = RideRequest.objects.filter(user=user, status='pending').first()
         await message.bot.send_message(
             chat_id=manager.telegram_id,
             text=f'{user.first_name} {user.last_name} оплатил поездку: \n'
@@ -98,10 +102,10 @@ async def confirm_payment(message: types.Message, state: FSMContext):
             reply_markup=types.InlineKeyboardMarkup(
                 inline_keyboard=[
                     [
-                        types.InlineKeyboardButton(text='Подтвердить', callback_data=f'confirm_{user.id}')
+                        types.InlineKeyboardButton(text='Подтвердить', callback_data=f'confirm_{ride.id}')
                     ],
                     [
-                        types.InlineKeyboardButton(text='Отклонить', callback_data=f'decline_{user.id}')
+                        types.InlineKeyboardButton(text='Отклонить', callback_data=f'decline_{ride.id}')
                     ]
                 ]
             )
@@ -130,30 +134,26 @@ async def my_rides(message: types.Message):
 
 
 @router.message(F.text == "Получить помощь")
-async def get_help(message: types.Message, state: FSMContext):
-    await state.set_state(ReportState.report)
-    await message.answer(
-        text='Введите ваше предложение:',
-        reply_markup=types.ReplyKeyboardRemove()
-    )
+async def get_help(message: types.Message):
+    today_schedule = ModerateSchedule.objects.filter(date__date=message.date).first()
+    if not today_schedule:
+        await message.answer(
+            text=f'<b>Помощь</b>\n'
+                 f'Для получения помощи обратитесь к администратору.'
+        )
+    else:
+        await message.answer(
+            text=f'<b>Помощь</b>\n'
+                 f'Для получения помощи обратитесь к администратору.'
+                 f't.me/{today_schedule.user.username}'
+        )
 
 
-@router.message(ReportState.report)
-async def write_question(message: types.Message, state: FSMContext):
-    user = User.objects.get(telegram_id=message.from_user.id)
-    Report.objects.create(user=user, report=message.text)
-    await message.answer(
-        text='Ваше сообщение отправлено. Спасибо за обратную связь!',
-        reply_markup=user_menu
-    )
-    await state.clear()
-
-
-@router.message(F.text == "Оставить отзыв/предложения")
+@router.message(F.text == "Оставить отзыв")
 async def send_comment(message: types.Message, state: FSMContext):
     await state.set_state(CommentState.comment)
     await message.answer(
-        text='Введите ваш отзыв:',
+        text='Напишите ваш отзыв:',
         reply_markup=types.ReplyKeyboardRemove()
     )
 

@@ -6,7 +6,7 @@ manager_menu = types.ReplyKeyboardMarkup(
             types.KeyboardButton(text='Просмотреть пользователей')
         ],
         [
-            types.KeyboardButton(text='Просмотреть отзывы/предложения')
+            types.KeyboardButton(text='Просмотреть отзывы')
         ],
         [
             types.KeyboardButton(text='Просмотреть поездки')

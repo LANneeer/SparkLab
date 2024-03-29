@@ -12,7 +12,7 @@ user_menu = types.ReplyKeyboardMarkup(
             types.KeyboardButton(text='Получить помощь')
         ],
         [
-            types.KeyboardButton(text='Оставить отзыв/предложения')
+            types.KeyboardButton(text='Оставить отзыв')
         ]
     ],
     resize_keyboard=True

@@ -1,6 +1,7 @@
 from aiogram import Router, types, F
-from aiogram.fsm.context import FSMContext
 
+from bot.infrastructure.keyboards.default.manager import manager_menu
+from bot.infrastructure.keyboards.default.user import user_menu
 from rides.models import Ride
 from users.models import User, Comment
 
@@ -8,48 +9,48 @@ router = Router(name='manager_menu')
 
 
 @router.message(F.text == "Просмотреть пользователей")
-async def view_users(message: types.Message, state: FSMContext):
+async def view_users(message: types.Message):
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
         users = User.objects.all()
-        users = [f"{user.username} - {user.first_name} {user.last_name}" for user in users]
+        users = [f"t.me/{user.username} - {user.first_name} {user.last_name}" for user in users]
         await message.answer(
             text='\n'.join(users),
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=manager_menu
         )
     else:
         await message.answer(
             text="У вас нет доступа к этой команде",
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=user_menu
         )
 
 
-@router.message(F.text == "Просмотреть отзывы/предложения")
-async def view_comments(message: types.Message, state: FSMContext):
+@router.message(F.text == "Просмотреть отзывы")
+async def view_comments(message: types.Message):
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
         comments = Comment.objects.all()
-        comments = [f"{comment.user.username} - {comment.comment}" for comment in comments]
+        comments = [f"t.me/{comment.user.username} - {comment.comment}" for comment in comments]
         await message.answer(
             text='\n'.join(comments),
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=manager_menu
         )
     else:
         await message.answer(
             text="У вас нет доступа к этой команде",
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=user_menu
         )
 
 
 @router.message(F.text == "Просмотреть поездки")
-async def view_rides(message: types.Message, state: FSMContext):
+async def view_rides(message: types.Message):
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
         rides = Ride.objects.all()
         rides = [f"{ride.ride_title} - {ride.departure.strftime('%d.%m.%Y %H:%M')}" for ride in rides]
         await message.answer(
             text='\n'.join(rides),
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=manager_menu
         )
     else:
         await message.answer(
             text="У вас нет доступа к этой команде",
-            reply_markup=types.ReplyKeyboardRemove()
+            reply_markup=user_menu
         )
