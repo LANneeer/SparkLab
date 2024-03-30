@@ -3,7 +3,7 @@ from users.models import User
 
 
 class Ride(models.Model):
-    user = models.ManyToManyField(User, related_name='rides', blank=True, through='RideRequest')
+    user = models.ManyToManyField(User, related_name='rides', through='RideRequest', blank=True)
     ride_title = models.CharField(max_length=255)
     ride_description = models.TextField()
     max_passengers = models.PositiveIntegerField(default=4)
@@ -29,7 +29,7 @@ class RideRequest(models.Model):
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ride_requests')
     ride = models.ForeignKey(Ride, on_delete=models.CASCADE, related_name='ride_requests')
-    status = models.CharField(max_length=50, choices=statuses, default='pending')
+    status = models.CharField(max_length=50, choices=statuses)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -39,3 +39,4 @@ class RideRequest(models.Model):
         verbose_name = 'Заявка на поездку'
         verbose_name_plural = 'Заявки на поездку'
         ordering = ('-created_at',)
+
