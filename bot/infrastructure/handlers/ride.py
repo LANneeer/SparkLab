@@ -3,9 +3,9 @@ from aiogram.fsm.context import FSMContext
 from django.utils import timezone
 
 from bot.infrastructure.keyboards.default.user import user_menu
-from bot.infrastructure.states.main import ReportState, CommentState, RideState
+from bot.infrastructure.states.main import CommentState, RideState
 from rides.models import Ride, RideRequest
-from users.models import Report, User, Comment, ModerateSchedule
+from users.models import User, Comment, ModerateSchedule
 
 router = Router(name='ride')
 
@@ -17,7 +17,7 @@ async def send_ride(message: types.Message, state: FSMContext):
     rides = rides.order_by('departure')
     rides = rides.values('departure').distinct()
     rides = [ride['departure'] for ride in rides]
-    rides = [ride.strftime('%d.%m.%Y') for ride in rides]
+    rides = {ride.strftime('%d.%m.%Y') for ride in rides}
     await state.set_state(RideState.ride)
     if not rides:
         await message.answer(
@@ -47,14 +47,13 @@ async def get_ride(message: types.Message, state: FSMContext):
     rides = rides.values('departure', 'ride_title')
     rides = [f"{ride['ride_title']} - {ride['departure'].strftime('%H:%M')}" for ride in rides]
     await state.set_state(RideState.payment)
+    rides_keyboard = [types.KeyboardButton(text=ride) for ride in rides ]
     await message.answer(
         text='Выберите поездку🚗:',
         reply_markup=types.ReplyKeyboardMarkup(
             keyboard=[
-                [[
-                    types.KeyboardButton(text=ride)
-                ] for ride in rides],
                 [
+                    *rides_keyboard,
                     types.KeyboardButton(text='👈Назад')
                 ]
             ],
@@ -71,13 +70,13 @@ async def confirm_ride(message: types.Message, state: FSMContext):
         rides = rides.order_by('departure')
         rides = rides.values('departure').distinct()
         rides = [ride['departure'] for ride in rides]
-        rides = [ride.strftime('%d.%m.%Y') for ride in rides]
+        rides = {ride.strftime('%d.%m.%Y') for ride in rides}
         await message.answer(
             text='Выберите дату поездки🕑:',
             reply_markup=types.ReplyKeyboardMarkup(
                 keyboard=[
                     [
-                        types.KeyboardButton(text=ride + "🕑")
+                        types.KeyboardButton(text=ride)
                     ] for ride in rides
                 ],
                 resize_keyboard=True
@@ -94,7 +93,7 @@ async def confirm_ride(message: types.Message, state: FSMContext):
         )
         await state.set_state(RideState.confirm)
         await message.answer(
-            text=f'Пожалуйста оплатите 450 тенге на этот номер через Kaspi банк🏦:\n'
+            text=f'Пожалуйста оплатите 400 тенге на этот номер через Kaspi банк🏦:\n'
                  f'{manager.payment_phone} - {manager.first_name} {manager.last_name[:1]}.',
             reply_markup=types.ReplyKeyboardMarkup(
                 keyboard=[
@@ -150,20 +149,28 @@ async def confirm_payment(message: types.Message, state: FSMContext):
 async def my_rides(message: types.Message):
     user = User.objects.get(telegram_id=message.from_user.id)
     rides = []
-    for ride in user.rides.filter(departure__gte=timezone.now()):
-        text = f"Название поездки: {ride.ride_title} \n" \
-               f"Время отъезда: {ride.departure.strftime('%a %d - %H:%M')}\n" \
-               f"Время прибытия: {ride.arrival.strftime('%d.%m.%Y')}\n" \
-               f"Статус: {ride.status}\n" \
-               f"Цена: 450 тенге\n" \
-               f"Пассажир: {ride.user.first_name} {ride.user.last_name}" \
-               f"Телефон пассажира: {ride.user.payment_phone}\n"
+    for ride in user.rides.filter(departure__gte=timezone.now(), ride_requests__status__in=['pending', 'approved']):
+        status = RideRequest.objects.filter(ride=ride, user=user).first().status
+        text = f"<b>Название поездки:</b> <i>{ride.ride_title}</i> \n" \
+               f"<b>Время отъезда:</b> <i>{ride.departure.strftime('%a %d - %H:%M')}</i>\n" \
+               f"<b>Время прибытия:</b> <i>{ride.arrival.strftime('%d.%m.%Y')}</i>\n" \
+               f"<b>Количество пассажиров:</b> <i>{ride.user.count()}</i>\n" \
+               f"<b>Статус:</b> <i>{status}</i>\n" \
+               f"<b>Цена:</b> <i>400 тенге</i>\n" \
+               f"<b>Пассажир:</b> <i>{user.first_name} {user.last_name}</i>\n" \
+               f"<b>Телефон пассажира:</b> <i>{user.payment_phone}</i>\n"
         rides.append(text)
-    text = "\n".join(rides) if rides else "У вас нет поездок.😔"
-    await message.answer(
-        text=text,
-        reply_markup=user_menu
-    )
+    if rides:
+        for ride in rides:
+            await message.answer(
+                text=ride,
+                reply_markup=user_menu
+            )
+    else:
+        await message.answer(
+            text='У вас пока нет поездок😔',
+            reply_markup=user_menu
+        )
 
 
 @router.message(F.text == "Получить помощь")
@@ -172,12 +179,12 @@ async def get_help(message: types.Message):
     if not today_schedule:
         await message.answer(
             text=f'<b>Помощь</b>\n'
-                 f'Для получения помощи обратитесь к администратору🧑‍💻.'
+                 f'Для получения помощи обратитесь к администратору🧑‍💻.\n'
         )
     else:
         await message.answer(
             text=f'<b>Помощь</b>\n'
-                 f'Для получения помощи обратитесь к администратору🧑‍💻.'
+                 f'Для получения помощи обратитесь к администратору🧑‍💻.\n'
                  f't.me/{today_schedule.user.username}'
         )
 

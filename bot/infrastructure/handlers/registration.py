@@ -70,7 +70,8 @@ async def get_last_name(message: types.Message, state: FSMContext):
 @router.message(RegistrationState.phone)
 async def get_phone(message: types.Message, state: FSMContext):
     user = User.objects.get(telegram_id=message.from_user.id)
-    user.payment_phone = message.text
+    phone = message.contact.phone_number if message.contact else message.text
+    user.payment_phone = phone
     user.save()
     if user.is_admin:
         await message.answer(
