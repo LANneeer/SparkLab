@@ -63,7 +63,7 @@ async def get_ride(message: types.Message, state: FSMContext):
 @router.message(RideState.payment)
 async def confirm_ride(message: types.Message, state: FSMContext):
     ride = Ride.objects.get(ride_title=message.text.split(' - ')[0])
-    manager = ModerateSchedule.objects.filter(date__date=message.date).first().user
+    manager = ModerateSchedule.objects.filter(date=message.date).first().user
     RideRequest.objects.create(
         user=User.objects.get(telegram_id=message.from_user.id),
         ride=ride,
@@ -91,7 +91,7 @@ async def confirm_ride(message: types.Message, state: FSMContext):
 async def confirm_payment(message: types.Message, state: FSMContext):
     if message.text == 'Подтвердить оплату':
         user = User.objects.get(telegram_id=message.from_user.id)
-        manager = ModerateSchedule.objects.filter(date__date=message.date).first().user
+        manager = ModerateSchedule.objects.filter(date=message.date).first().user
         ride = RideRequest.objects.filter(user=user, status='pending').first()
         await message.bot.send_message(
             chat_id=manager.telegram_id,
@@ -135,7 +135,7 @@ async def my_rides(message: types.Message):
 
 @router.message(F.text == "Получить помощь")
 async def get_help(message: types.Message):
-    today_schedule = ModerateSchedule.objects.filter(date__date=message.date).first()
+    today_schedule = ModerateSchedule.objects.filter(date=message.date).first()
     if not today_schedule:
         await message.answer(
             text=f'<b>Помощь</b>\n'

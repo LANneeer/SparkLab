@@ -8,7 +8,7 @@ router = Router(name='help')
 
 @router.message(Command("help"))
 async def menu(message: types.Message):
-    today_schedule = ModerateSchedule.objects.filter(date__date=message.date).first()
+    today_schedule = ModerateSchedule.objects.filter(date=message.date).first()
     if not today_schedule:
         await message.answer(
             text=f'<b>Помощь</b>\n'

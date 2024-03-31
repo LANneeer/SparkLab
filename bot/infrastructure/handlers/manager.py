@@ -13,6 +13,8 @@ async def view_users(message: types.Message):
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
         users = User.objects.all()
         users = [f"t.me/{user.username} - {user.first_name} {user.last_name}" for user in users]
+        if not users:
+            users = ["Пользователей нет"]
         await message.answer(
             text='\n'.join(users),
             reply_markup=manager_menu
@@ -29,6 +31,8 @@ async def view_comments(message: types.Message):
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
         comments = Comment.objects.all()
         comments = [f"t.me/{comment.user.username} - {comment.comment}" for comment in comments]
+        if not comments:
+            comments = ["Отзывов нет"]
         await message.answer(
             text='\n'.join(comments),
             reply_markup=manager_menu
@@ -45,6 +49,8 @@ async def view_rides(message: types.Message):
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
         rides = Ride.objects.all()
         rides = [f"{ride.ride_title} - {ride.departure.strftime('%d.%m.%Y %H:%M')}" for ride in rides]
+        if not rides:
+            rides = ["Поездок нет"]
         await message.answer(
             text='\n'.join(rides),
             reply_markup=manager_menu
