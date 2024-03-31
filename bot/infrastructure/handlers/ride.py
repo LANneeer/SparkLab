@@ -149,7 +149,16 @@ async def confirm_payment(message: types.Message, state: FSMContext):
 @router.message(F.text == "Мои поездки")
 async def my_rides(message: types.Message):
     user = User.objects.get(telegram_id=message.from_user.id)
-    rides = [f"{ride.ride_title} - {ride.departure.strftime('%a %d - %H:%M')}" for ride in user.rides.all()]
+    rides = []
+    for ride in user.rides.filter(departure__gte=timezone.now()):
+        text = f"Название поездки: {ride.ride_title} \n" \
+               f"Время отъезда: {ride.departure.strftime('%a %d - %H:%M')}\n" \
+               f"Время прибытия: {ride.arrival.strftime('%d.%m.%Y')}\n" \
+               f"Статус: {ride.status}\n" \
+               f"Цена: 450 тенге\n" \
+               f"Пассажир: {ride.user.first_name} {ride.user.last_name}" \
+               f"Телефон пассажира: {ride.user.payment_phone}\n"
+        rides.append(text)
     text = "\n".join(rides) if rides else "У вас нет поездок.😔"
     await message.answer(
         text=text,

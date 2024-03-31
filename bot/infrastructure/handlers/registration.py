@@ -55,6 +55,14 @@ async def get_last_name(message: types.Message, state: FSMContext):
     user.save()
     await message.answer(
         text='<b>Введи ваш номер <i>телефона</i></b>',
+        reply_markup=types.ReplyKeyboardMarkup(
+            keyboard=[
+                [
+                    types.KeyboardButton(text='Отправить номер телефона📱', request_contact=True)
+                ]
+            ],
+            resize_keyboard=True
+        )
     )
     await state.set_state(RegistrationState.phone)
 
