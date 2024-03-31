@@ -23,18 +23,18 @@ async def hello(message: types.Message, state: FSMContext, command: CommandObjec
         else:
             User.objects.create_user(username=message.from_user.username, telegram_id=message.from_user.id)
         await message.answer(
-            text='Для начала работы введи своё имя.'
+            text='<b>Для начала работы введи ваше <i>имя</i></b>'
         )
         await state.set_state(RegistrationState.first_name)
     else:
         if User.objects.get(telegram_id=message.from_user.id).is_admin:
             await message.answer(
-                text='Теперь ты можешь воспользоваться меню команд /menu',
+                text='Вы уже зарегистрированы❗',
                 reply_markup=manager_menu
             )
         else:
             await message.answer(
-                text='Теперь ты можешь воспользоваться меню команд /menu',
+                text='Вы уже зарегистрированы❗',
                 reply_markup=user_menu
             )
 
@@ -44,7 +44,7 @@ async def get_first_name(message: types.Message, state: FSMContext):
     user = User.objects.get(telegram_id=message.from_user.id)
     user.first_name = message.text
     user.save()
-    await message.answer(text='Теперь введи свою фамилию.')
+    await message.answer(text='<b>Введите вашу <i>фамилию</i></b>')
     await state.set_state(RegistrationState.last_name)
 
 
@@ -54,7 +54,7 @@ async def get_last_name(message: types.Message, state: FSMContext):
     user.last_name = message.text
     user.save()
     await message.answer(
-        text='Теперь введи свой номер телефона.',
+        text='<b>Введи ваш номер <i>телефона</i></b>',
     )
     await state.set_state(RegistrationState.phone)
 
@@ -66,12 +66,12 @@ async def get_phone(message: types.Message, state: FSMContext):
     user.save()
     if user.is_admin:
         await message.answer(
-            text='Теперь ты можешь воспользоваться меню команд /menu',
+            text='Вы успешно зарегистрировались как администратор!🎉',
             reply_markup=manager_menu
         )
     else:
         await message.answer(
-            text='Теперь ты можешь воспользоваться меню команд /menu',
+            text='Вы успешно зарегистрировались как пользователь!🎉',
             reply_markup=user_menu
         )
     await state.clear()
