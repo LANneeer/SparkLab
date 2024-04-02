@@ -85,28 +85,36 @@ async def confirm_ride(message: types.Message, state: FSMContext):
         await state.set_state(RideState.ride)
     else:
         ride = Ride.objects.get(ride_title=message.text.split(' - ')[0])
-        manager = ModerateSchedule.objects.filter(date=message.date).first().user
-        RideRequest.objects.create(
-            user=User.objects.get(telegram_id=message.from_user.id),
-            ride=ride,
-            status='pending',
-        )
-        await state.set_state(RideState.confirm)
-        await message.answer(
-            text=f'Пожалуйста оплатите 400 тенге на этот номер через Kaspi банк🏦:\n'
-                 f'{manager.payment_phone} - {manager.first_name} {manager.last_name[:1]}.',
-            reply_markup=types.ReplyKeyboardMarkup(
-                keyboard=[
-                    [
-                        types.KeyboardButton(text='Подтвердить оплату🟢')
-                    ],
-                    [
-                        types.KeyboardButton(text='Отменить🛑')
-                    ],
-                ],
-                resize_keyboard=True
+        manager = ModerateSchedule.objects.filter(date=message.date).first()
+        if not manager:
+            await message.answer(
+                text='Поездка отменена так как нету модераторов🛑',
+                reply_markup=user_menu
             )
-        )
+            await state.clear()
+        else:
+            manager = manager.user
+            RideRequest.objects.create(
+                user=User.objects.get(telegram_id=message.from_user.id),
+                ride=ride,
+                status='pending',
+            )
+            await state.set_state(RideState.confirm)
+            await message.answer(
+                text=f'Пожалуйста оплатите 400 тенге на этот номер через Kaspi банк🏦:\n'
+                     f'{manager.payment_phone} - {manager.first_name} {manager.last_name[:1]}.',
+                reply_markup=types.ReplyKeyboardMarkup(
+                    keyboard=[
+                        [
+                            types.KeyboardButton(text='Подтвердить оплату🟢')
+                        ],
+                        [
+                            types.KeyboardButton(text='Отменить🛑')
+                        ],
+                    ],
+                    resize_keyboard=True
+                )
+            )
 
 
 @router.message(RideState.confirm)
