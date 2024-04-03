@@ -45,7 +45,7 @@ async def get_ride(message: types.Message, state: FSMContext):
     rides = Ride.objects.filter(departure__gte=departure, departure__lte=departure + timezone.timedelta(days=1))
     rides = rides.order_by('departure')
     rides = rides.values('departure', 'ride_title')
-    rides = [f"{ride['ride_title']} - {ride['departure'].strftime('%H:%M')}" for ride in rides]
+    rides = [f"{ride['pk']} - {ride['ride_title']} - {ride['departure'].strftime('%H:%M')}" for ride in rides]
     await state.set_state(RideState.payment)
     rides_keyboard = [types.KeyboardButton(text=ride) for ride in rides ]
     await message.answer(
@@ -84,7 +84,8 @@ async def confirm_ride(message: types.Message, state: FSMContext):
         )
         await state.set_state(RideState.ride)
     else:
-        ride = Ride.objects.get(ride_title=message.text.split(' - ')[0])
+        data = message.text.split(' - ')
+        ride = Ride.objects.get(pk=data[0])
         manager = ModerateSchedule.objects.filter(date=message.date).first()
         if not manager:
             await message.answer(
