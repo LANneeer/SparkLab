@@ -45,7 +45,7 @@ async def get_ride(message: types.Message, state: FSMContext):
     rides = Ride.objects.filter(departure__gte=departure, departure__lte=departure + timezone.timedelta(days=1))
     rides = rides.order_by('departure')
     rides = rides.values('departure', 'ride_title')
-    rides = [f"{ride['pk']} - {ride['ride_title']} - {ride['departure'].strftime('%H:%M')}" for ride in rides]
+    rides = [f"{ride.id} - {ride['ride_title']} - {ride['departure'].strftime('%H:%M')}" for ride in rides]
     await state.set_state(RideState.payment)
     rides_keyboard = [types.KeyboardButton(text=ride) for ride in rides ]
     await message.answer(
