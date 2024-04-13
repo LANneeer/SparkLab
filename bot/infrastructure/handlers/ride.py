@@ -102,7 +102,7 @@ async def confirm_ride(message: types.Message, state: FSMContext):
             )
             await state.set_state(RideState.confirm)
             await message.answer(
-                text=f'Пожалуйста оплатите 400 тенге на этот номер через Kaspi банк🏦:\n'
+                text=f'Пожалуйста оплатите 300 тенге на этот номер через Kaspi банк🏦:\n'
                      f'{manager.payment_phone} - {manager.first_name} {manager.last_name[:1]}.',
                 reply_markup=types.ReplyKeyboardMarkup(
                     keyboard=[
@@ -216,3 +216,4 @@ async def write_comment(message: types.Message, state: FSMContext):
         reply_markup=user_menu
     )
     await state.clear()
+
