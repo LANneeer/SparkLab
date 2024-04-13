@@ -82,6 +82,7 @@ async def arrived_ride(call: types.CallbackQuery):
 async def leave_review(call: types.CallbackQuery, state: FSMContext):
     await call.message.answer(
         text='Оставьте ваш отзыв о поездке:',
+        reply_markup=types.ReplyKeyboardRemove()
     )
     await state.set_state(CommentState.comment)
     await call.answer()
