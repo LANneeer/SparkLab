@@ -120,14 +120,15 @@ async def confirm_ride(message: types.Message, state: FSMContext):
 
 @router.message(RideState.confirm)
 async def confirm_payment(message: types.Message, state: FSMContext):
+    user = User.objects.get(telegram_id=message.from_user.id)
     if message.text == 'Отменить🛑':
         await message.answer(
             text='Поездка отменена🛑',
             reply_markup=user_menu
         )
+        RideRequest.objects.filter(user=user, status='pending').first().delete()
         await state.clear()
     else:
-        user = User.objects.get(telegram_id=message.from_user.id)
         manager = ModerateSchedule.objects.filter(date=message.date).first().user
         ride = RideRequest.objects.filter(user=user, status='pending').first()
         await message.bot.send_message(
@@ -165,7 +166,7 @@ async def my_rides(message: types.Message):
                f"<b>Время прибытия:</b> <i>{ride.arrival.strftime('%d.%m.%Y')}</i>\n" \
                f"<b>Количество пассажиров:</b> <i>{ride.user.count()}</i>\n" \
                f"<b>Статус:</b> <i>{status}</i>\n" \
-               f"<b>Цена:</b> <i>400 тенге</i>\n" \
+               f"<b>Цена:</b> <i>300 тенге</i>\n" \
                f"<b>Пассажир:</b> <i>{user.first_name} {user.last_name}</i>\n" \
                f"<b>Телефон пассажира:</b> <i>{user.payment_phone}</i>\n"
         rides.append(text)
