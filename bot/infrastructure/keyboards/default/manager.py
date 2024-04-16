@@ -10,6 +10,9 @@ manager_menu = types.ReplyKeyboardMarkup(
         ],
         [
             types.KeyboardButton(text='Просмотреть поездки')
+        ],
+        [
+            types.KeyboardButton(text='Посмотреть записи')
         ]
     ],
     resize_keyboard=True
