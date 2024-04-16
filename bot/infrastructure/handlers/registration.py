@@ -17,11 +17,15 @@ async def hello(message: types.Message, state: FSMContext, command: CommandObjec
     await message.answer(text=welcome_message)
     if not User.objects.filter(telegram_id=message.from_user.id).exists():
         args = command.args
+        if message.from_user.username:
+            username = message.from_user.username
+        else:
+            username = f'{message.from_user.id}'
         if args:
-            User.objects.create_user(username=message.from_user.username, telegram_id=message.from_user.id,
+            User.objects.create_user(username=username, telegram_id=message.from_user.id,
                                      is_staff=True, is_admin=True)
         else:
-            User.objects.create_user(username=message.from_user.username, telegram_id=message.from_user.id)
+            User.objects.create_user(username=username, telegram_id=message.from_user.id)
         await message.answer(
             text='<b>Для начала работы введи ваше <i>имя</i></b>'
         )
