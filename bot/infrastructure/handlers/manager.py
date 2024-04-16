@@ -66,14 +66,18 @@ async def view_rides(message: types.Message):
 @router.message(F.text == "Посмотреть записи")
 async def view_records(message: types.Message):
     if User.objects.get(telegram_id=message.from_user.id).is_admin:
-        records = {}
+        rides = Ride.objects.filter(
+            arrival__lte=timezone.now().replace(hour=23, minute=59, second=59),
+            departure__gte=timezone.now().replace(hour=0, minute=0, second=0)
+        )
+        records = {ride: [] for ride in rides}
         today_ride_requests = RideRequest.objects.filter(
             ride__arrival__lte=timezone.now().replace(hour=23, minute=59, second=59),
             ride__departure__gte=timezone.now().replace(hour=0, minute=0, second=0)
         )
         for rr in today_ride_requests:
-            records[rr.ride] += f"t.me/{rr.user.username} - {rr.user.first_name} {rr.user.last_name} - {rr.status}\n"
-        text = "\n\n".join([f"{ride.ride_title} - {ride.departure.strftime('%d.%m.%Y %H:%M')}\n{record}" for ride, record in records.items()])
+            records[rr.ride].append(f"t.me/{rr.user.username} - {rr.user.first_name} {rr.user.last_name} - {rr.status}\n")
+        text = "\n\n".join([f"{ride.ride_title} - {ride.departure.strftime('%d.%m.%Y %H:%M')}:\nколичество зарегистрированных:{len(record)}\n{''.join(record)}" for ride, record in records.items()])
         if not today_ride_requests:
             text = "Записей пока нет😔"
         await message.answer(
