@@ -136,7 +136,9 @@ async def confirm_payment(message: types.Message, state: FSMContext):
             text=f'🔔{user.first_name} {user.last_name} оплатил поездку: \n'
                  f'{ride.ride.ride_title} - {ride.ride.departure.strftime("%a %d - %H:%M")} '
                  f'- {ride.ride.arrival.strftime("%d.%m.%Y")}\n'
-                 f'Подтвердите или отклоните его заявку.',
+                 f'Подтвердите или отклоните его заявку.\n'
+                 f'📞{user.payment_phone}'
+                 f'🔗t.me/{user.username}',
             reply_markup=types.InlineKeyboardMarkup(
                 inline_keyboard=[
                     [
