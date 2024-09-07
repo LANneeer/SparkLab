@@ -165,7 +165,7 @@ async def my_rides(message: types.Message):
         status = RideRequest.objects.filter(ride=ride, user=user).first().status
         text = f"<b>Название поездки:</b> <i>{ride.ride_title}</i> \n" \
                f"<b>Время отъезда:</b> <i>{ride.departure.strftime('%a %d - %H:%M')}</i>\n" \
-               f"<b>Время прибытия:</b> <i>{ride.arrival.strftime('%d.%m.%Y')}</i>\n" \
+            f"<b>Время прибытия:</b> <i>{ride.arrival.strftime('%a %d - %H:%M')}</i>\n" \
                f"<b>Количество пассажиров:</b> <i>{ride.user.count()}</i>\n" \
                f"<b>Статус:</b> <i>{status}</i>\n" \
                f"<b>Цена:</b> <i>300 тенге</i>\n" \
