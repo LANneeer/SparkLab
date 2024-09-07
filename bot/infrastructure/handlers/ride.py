@@ -53,7 +53,7 @@ async def get_ride(message: types.Message, state: FSMContext):
     await message.answer(
         text="Выберите поездку🚗:",
         reply_markup=types.ReplyKeyboardMarkup(
-            keyboard=[[*rides_keyboard, types.KeyboardButton(text="👈Назад")]],
+            keyboard=[[rides_keyboard, types.KeyboardButton(text="👈Назад")]],
             resize_keyboard=True,
         ),
     )
