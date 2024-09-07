@@ -49,11 +49,11 @@ async def get_ride(message: types.Message, state: FSMContext):
         for ride in rides
     ]
     await state.set_state(RideState.payment)
-    rides_keyboard = [types.KeyboardButton(text=ride) for ride in rides]
+    rides_keyboard = [[types.KeyboardButton(text=ride)] for ride in rides]
     await message.answer(
         text="Выберите поездку🚗:",
         reply_markup=types.ReplyKeyboardMarkup(
-            keyboard=[[rides_keyboard, types.KeyboardButton(text="👈Назад")]],
+            keyboard=[[*rides_keyboard, types.KeyboardButton(text="👈Назад")]],
             resize_keyboard=True,
         ),
     )
