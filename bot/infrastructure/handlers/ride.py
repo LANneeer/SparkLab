@@ -97,7 +97,7 @@ async def confirm_ride(message: types.Message, state: FSMContext):
             )
             await state.set_state(RideState.confirm)
             await message.answer(
-                text=f"Пожалуйста оплатите 300 тенге на этот номер через Kaspi банк🏦:\n"
+                text=f"Пожалуйста оплатите 400 тенге на этот номер через Kaspi банк🏦:\n"
                 f"{manager.payment_phone} - {manager.first_name} {manager.last_name[:1]}.",
                 reply_markup=types.ReplyKeyboardMarkup(
                     keyboard=[
@@ -163,7 +163,7 @@ async def my_rides(message: types.Message):
             f"<b>Время прибытия:</b> <i>{ride.arrival.strftime('%a %d - %H:%M')}</i>\n"
             f"<b>Количество пассажиров:</b> <i>{ride.user.count()}</i>\n"
             f"<b>Статус:</b> <i>{status}</i>\n"
-            f"<b>Цена:</b> <i>300 тенге</i>\n"
+            f"<b>Цена:</b> <i>400 тенге</i>\n"
             f"<b>Пассажир:</b> <i>{user.first_name} {user.last_name}</i>\n"
             f"<b>Телефон пассажира:</b> <i>{user.payment_phone}</i>\n"
         )
